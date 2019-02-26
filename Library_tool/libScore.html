@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Library Comparison Tool</title>
+    <link rel="shortcut icon" type="image/png" href="favicon.ico" />
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css"></link>
+</head>
+
+<body>
+
+    <section class="hero is-primary">
+        <div class="hero-body">
+            <div class="container is-centered">
+                <h1 class="title">
+                    Library Comparison Tool
+                </h1>
+                <h2 class="subtitle">
+                    Simplify life
+                </h2>
+            </div>
+        </div>
+    </section>
+
+    <br>
+
+    <div class="columns is-centered">
+        <div class="column is-one-quarter">
+            <form method="GET" id="libForm">
+                <div id="rmvMe">
+                    <input title="The library you want to compare" id="lib1" class="input" placeholder="Library Name" name="lib1"></input><br><br>
+                    <input title="The library you want to compare" id="lib2" class="input" placeholder="Library Name" name="lib2"></input><br><br>
+                </div>
+            </form>
+            <button title="Add another library name" id="addMe" class="button">+</button>
+            <input title="Get your scores!" id='getScores' type="submit" class="button" value="Get Scores" form="libForm"></input>
+            <a class="button" href="libScore.html">Clear</a>
+        </div>
+        <div id='scoreResponse' class="column is-one-quarter"></div>
+    </div>
+
+
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script>
+        'use strict';
+        const ONEHUN = 100;
+        var incrementor = 2;
+        var inputId;
+        var libQueries;
+        var libKeyValues;
+        var libValues;
+        var libraries = [];
+        var score;
+        var finalScore;
+
+        $('#addMe').click(add);
+
+        $(document).ready(function() {
+            getScores();
+        });
+
+        function add() {
+            incrementor++;
+            inputId = "lib" + incrementor;
+            $('#libForm').append('<input id="' + inputId + '" class="input" placeholder="Library Name" name="' + inputId + '"></input><br><br>');
+            $('#scoreResponse').append('<div></div><br>');
+        }
+
+        function splitURL() {
+            var fullURL = window.location.href.split('?');
+            libQueries = fullURL[1];
+            libKeyValues = libQueries.split('&');
+            for (var value of libKeyValues) {
+                libValues = value.split('=');
+                libraries.push(libValues[1]);
+            }
+        }
+
+        function getScores() {
+            splitURL();
+            for (var library of libraries) {
+                getMyJson(library);
+            }
+        }
+
+        function getMyJson(library) {
+            var newIncrement = 0;
+            $.getJSON('https://api.npms.io/v2/package/' + library, function(json) {
+                score = json.score.final * ONEHUN;
+                finalScore = score.toFixed(0);
+                $('#rmvMe').remove();
+                $('#libForm').append('<input title="The library you want to compare" id="lib' + newIncrement + '" class="input" placeholder="Library Name" name="lib' + newIncrement + '" value="' + library + '"></input><br><br>');
+                $('#scoreResponse').append('<div title="The score for that library" class="input">' + library + ' score: ' + finalScore + '</div><br><br>');
+                newIncrement++;
+            });
+        }
+    </script>
+</body>
+
+</html>
